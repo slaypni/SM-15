@@ -14,6 +14,7 @@
     function SM() {
       this.data = __bind(this.data, this);
       this.discard = __bind(this.discard, this);
+      this._update = __bind(this._update, this);
       this.answer = __bind(this.answer, this);
       this.nextItem = __bind(this.nextItem, this);
       this.addItem = __bind(this.addItem, this);
@@ -71,14 +72,18 @@
     };
 
     SM.prototype.answer = function(grade, item) {
+      this._update(grade, item);
+      this.discard(item);
+      return this.q.splice(this._findIndexToInsert(item), 0, item);
+    };
+
+    SM.prototype._update = function(grade, item) {
       if (item.repetition >= 0) {
         this.forgettingCurves.registerPoint(grade, item);
         this.ofm.update();
         this.fi_g.update(grade, item);
       }
-      item.answer(grade);
-      this.discard(item);
-      return this.q.splice(this._findIndexToInsert(item), 0, item);
+      return item.answer(grade);
     };
 
     SM.prototype.discard = function(item) {

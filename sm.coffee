@@ -33,14 +33,16 @@ class @SM
     return null
 
   answer: (grade, item) =>
+    @_update grade, item
+    @discard item
+    @q.splice @_findIndexToInsert(item), 0, item
+
+  _update: (grade, item) =>
     if item.repetition >= 0
       @forgettingCurves.registerPoint grade, item
       @ofm.update()
       @fi_g.update grade, item
     item.answer grade
-
-    @discard item
-    @q.splice @_findIndexToInsert(item), 0, item
 
   discard: (item) =>
     index = @q.indexOf item
