@@ -89,12 +89,12 @@ class Item
     @dueDate = new Date 0
     @_afs = []
  
-  interval: =>
+  interval: (now = new Date())=>
     return @sm.intervalBase if not @previousDate?
-    return (new Date()) - @previousDate
+    return now - @previousDate
 
-  uf: =>
-    return @interval() / (@optimumInterval / @of)
+  uf: (now = new Date()) =>
+    return @interval(now) / (@optimumInterval / @of)
 
   # A-Factor
   af: (value = undefined) =>
@@ -110,18 +110,18 @@ class Item
   # This algorithm employs a slightly different approach from the original description of SM-15.
   # It derives the optimum interval from the acutual interval and O-Factor instead of the previously calculated interval and O-Factor.
   # This approach may make it possible to conduct advanced repetition and delayed repetition without employing a complicated way.
-  _I: =>
+  _I: (now = new Date()) =>
     of_ = @sm.ofm.of(@repetition, if @repetition == 0 then @lapse else @af())
-    @of = Math.max 1, (of_ - 1) * (@interval() / @optimumInterval) + 1
+    @of = Math.max 1, (of_ - 1) * (@interval(now) / @optimumInterval) + 1
     @optimumInterval = Math.round @optimumInterval * @of
     
-    @previousDate = new Date()
-    @dueDate = new Date (new Date()).getTime() + @optimumInterval
+    @previousDate = now
+    @dueDate = new Date now.getTime() + @optimumInterval
 
   # 9. 11. Update A-Factor
-  _updateAF: (grade) =>
+  _updateAF: (grade, now = new Date()) =>
     estimatedFI = Math.max 1, @sm.fi_g.fi grade
-    correctedUF = @uf() * (@sm.requestedFI / estimatedFI)
+    correctedUF = @uf(now) * (@sm.requestedFI / estimatedFI)
     estimatedAF = 
       if @repetition > 0
         @sm.ofm.af @repetition, correctedUF
@@ -132,8 +132,8 @@ class Item
     @_afs = @_afs[(Math.max 0, @_afs.length - MAX_AFS_COUNT)..-1]
     @af (sum(@_afs.map (a, i) -> a * (i+1)) / sum([1..@_afs.length]))  # weighted average
 
-  answer: (grade) =>
-    @_updateAF grade if @repetition >= 0
+  answer: (grade, now = new Date()) =>
+    @_updateAF grade, now if @repetition >= 0
     if grade >= THRESHOLD_RECALL
       @repetition++ if @repetition < (RANGE_REPETITION - 1)
     else
@@ -141,7 +141,7 @@ class Item
         @lapse++ if @lapse < (RANGE_AF - 1)
         @previousDate = null  # set interval() to @sm.intervalBase
       @repetition = 0
-    @_I()
+    @_I now
 
   data: =>
     value: @value
