@@ -150,12 +150,14 @@ class Item
     of: @of
     optimumInterval: @optimumInterval
     dueDate: @dueDate
+    previousDate: @previousDate
     _afs: @_afs
 
   @load: (sm, data) =>
     item = new @ sm
     item[k] = v for k, v of data
     item.dueDate = new Date item.dueDate
+    item.previousDate = new Date item.previousDate if item.previousDate?
     return item
 
 
