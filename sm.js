@@ -178,15 +178,21 @@
       this._afs = [];
     }
 
-    Item.prototype.interval = function() {
+    Item.prototype.interval = function(now) {
+      if (now == null) {
+        now = new Date();
+      }
       if (this.previousDate == null) {
         return this.sm.intervalBase;
       }
-      return (new Date()) - this.previousDate;
+      return now - this.previousDate;
     };
 
-    Item.prototype.uf = function() {
-      return this.interval() / (this.optimumInterval / this.of);
+    Item.prototype.uf = function(now) {
+      if (now == null) {
+        now = new Date();
+      }
+      return this.interval(now) / (this.optimumInterval / this.of);
     };
 
     Item.prototype.af = function(value) {
@@ -226,19 +232,25 @@
       })(this));
     };
 
-    Item.prototype._I = function() {
+    Item.prototype._I = function(now) {
       var of_;
-      of_ = this.sm.ofm.of(this.repetition, this.repetition === 0 ? this.lapse : this.af());
-      this.of = Math.max(1, (of_ - 1) * (this.interval() / this.optimumInterval) + 1);
+      if (now == null) {
+        now = new Date();
+      }
+      of_ = this.sm.ofm.of(this.repetition, this.repetition === 0 ? this.lapse : this.afIndex());
+      this.of = Math.max(1, (of_ - 1) * (this.interval(now) / this.optimumInterval) + 1);
       this.optimumInterval = Math.round(this.optimumInterval * this.of);
-      this.previousDate = new Date();
-      return this.dueDate = new Date((new Date()).getTime() + this.optimumInterval);
+      this.previousDate = now;
+      return this.dueDate = new Date(now.getTime() + this.optimumInterval);
     };
 
-    Item.prototype._updateAF = function(grade) {
+    Item.prototype._updateAF = function(grade, now) {
       var correctedUF, estimatedAF, estimatedFI, _i, _ref, _results;
+      if (now == null) {
+        now = new Date();
+      }
       estimatedFI = Math.max(1, this.sm.fi_g.fi(grade));
-      correctedUF = this.uf() * (this.sm.requestedFI / estimatedFI);
+      correctedUF = this.uf(now) * (this.sm.requestedFI / estimatedFI);
       estimatedAF = this.repetition > 0 ? this.sm.ofm.af(this.repetition, correctedUF) : Math.max(MIN_AF, Math.min(MAX_AF, correctedUF));
       this._afs.push(estimatedAF);
       this._afs = this._afs.slice(Math.max(0, this._afs.length - MAX_AFS_COUNT));
@@ -251,9 +263,12 @@
       }).apply(this)));
     };
 
-    Item.prototype.answer = function(grade) {
+    Item.prototype.answer = function(grade, now) {
+      if (now == null) {
+        now = new Date();
+      }
       if (this.repetition >= 0) {
-        this._updateAF(grade);
+        this._updateAF(grade, now);
       }
       if (grade >= THRESHOLD_RECALL) {
         if (this.repetition < (RANGE_REPETITION - 1)) {
@@ -268,7 +283,7 @@
         }
         this.repetition = 0;
       }
-      return this._I();
+      return this._I(now);
     };
 
     Item.prototype.data = function() {
@@ -279,6 +294,7 @@
         of: this.of,
         optimumInterval: this.optimumInterval,
         dueDate: this.dueDate,
+        previousDate: this.previousDate,
         _afs: this._afs
       };
     };
@@ -291,6 +307,9 @@
         item[k] = v;
       }
       item.dueDate = new Date(item.dueDate);
+      if (item.previousDate != null) {
+        item.previousDate = new Date(item.previousDate);
+      }
       return item;
     };
 

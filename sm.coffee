@@ -111,7 +111,7 @@ class Item
   # It derives the optimum interval from the acutual interval and O-Factor instead of the previously calculated interval and O-Factor.
   # This approach may make it possible to conduct advanced repetition and delayed repetition without employing a complicated way.
   _I: (now = new Date()) =>
-    of_ = @sm.ofm.of(@repetition, if @repetition == 0 then @lapse else @af())
+    of_ = @sm.ofm.of(@repetition, if @repetition == 0 then @lapse else @afIndex())
     @of = Math.max 1, (of_ - 1) * (@interval(now) / @optimumInterval) + 1
     @optimumInterval = Math.round @optimumInterval * @of
     
