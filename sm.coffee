@@ -32,17 +32,17 @@ class @SM
     return @q[0] if isAdvanceable or @q[0].dueDate < new Date()
     return null
 
-  answer: (grade, item) =>
-    @_update grade, item
+  answer: (grade, item, now = new Date()) =>
+    @_update grade, item, now
     @discard item
     @q.splice @_findIndexToInsert(item), 0, item
 
-  _update: (grade, item) =>
+  _update: (grade, item, now = new Date()) =>
     if item.repetition >= 0
-      @forgettingCurves.registerPoint grade, item
+      @forgettingCurves.registerPoint grade, item, now
       @ofm.update()
-      @fi_g.update grade, item
-    item.answer grade
+      @fi_g.update grade, item, now
+    item.answer grade, now
 
   discard: (item) =>
     index = @q.indexOf item
@@ -175,9 +175,9 @@ class FI_G
     @points = @points[(Math.max 0, @points.length - MAX_POINTS_COUNT)..-1]
       
   #10. Update regression of FI-G graph
-  update: (grade, item) =>
+  update: (grade, item, now = new Date()) =>
     expectedFI = =>
-      return (item.uf() / item.of) * @sm.requestedFI  # assuming linear forgetting curve for simplicity
+      return (item.uf(now) / item.of) * @sm.requestedFI  # assuming linear forgetting curve for simplicity
       ### A way to get the expected forgetting index using a forgetting curve
       curve = @sm.forgettingCurves.curves[item.repetition][item.afIndex()]
       uf = curve.uf (100 - @sm.requestedFI)
@@ -222,9 +222,9 @@ class ForgettingCurves
               [[0, REMEMBERED]].concat p
           new ForgettingCurve partialPoints
 
-  registerPoint: (grade, item) =>
+  registerPoint: (grade, item, now = new Date()) =>
     afIndex = if item.repetition > 0 then item.afIndex() else item.lapse
-    @curves[item.repetition][afIndex].registerPoint grade, item.uf()
+    @curves[item.repetition][afIndex].registerPoint grade, item.uf now
 
   data: =>
     points: ((@curves[r][a].points for a in [0...RANGE_AF]) for r in [0...RANGE_REPETITION])

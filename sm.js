@@ -71,19 +71,25 @@
       return null;
     };
 
-    SM.prototype.answer = function(grade, item) {
-      this._update(grade, item);
+    SM.prototype.answer = function(grade, item, now) {
+      if (now == null) {
+        now = new Date();
+      }
+      this._update(grade, item, now);
       this.discard(item);
       return this.q.splice(this._findIndexToInsert(item), 0, item);
     };
 
-    SM.prototype._update = function(grade, item) {
-      if (item.repetition >= 0) {
-        this.forgettingCurves.registerPoint(grade, item);
-        this.ofm.update();
-        this.fi_g.update(grade, item);
+    SM.prototype._update = function(grade, item, now) {
+      if (now == null) {
+        now = new Date();
       }
-      return item.answer(grade);
+      if (item.repetition >= 0) {
+        this.forgettingCurves.registerPoint(grade, item, now);
+        this.ofm.update();
+        this.fi_g.update(grade, item, now);
+      }
+      return item.answer(grade, now);
     };
 
     SM.prototype.discard = function(item) {
@@ -348,11 +354,14 @@
       return this.points = this.points.slice(Math.max(0, this.points.length - MAX_POINTS_COUNT));
     };
 
-    FI_G.prototype.update = function(grade, item) {
+    FI_G.prototype.update = function(grade, item, now) {
       var expectedFI;
+      if (now == null) {
+        now = new Date();
+      }
       expectedFI = (function(_this) {
         return function() {
-          return (item.uf() / item.of) * _this.sm.requestedFI;
+          return (item.uf(now) / item.of) * _this.sm.requestedFI;
 
           /* A way to get the expected forgetting index using a forgetting curve
           curve = @sm.forgettingCurves.curves[item.repetition][item.afIndex()]
@@ -442,10 +451,13 @@
       }).call(this);
     }
 
-    ForgettingCurves.prototype.registerPoint = function(grade, item) {
+    ForgettingCurves.prototype.registerPoint = function(grade, item, now) {
       var afIndex;
+      if (now == null) {
+        now = new Date();
+      }
       afIndex = item.repetition > 0 ? item.afIndex() : item.lapse;
-      return this.curves[item.repetition][afIndex].registerPoint(grade, item.uf());
+      return this.curves[item.repetition][afIndex].registerPoint(grade, item.uf(now));
     };
 
     ForgettingCurves.prototype.data = function() {
