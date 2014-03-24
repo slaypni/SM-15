@@ -136,12 +136,13 @@ class Item
     @_updateAF grade, now if @repetition >= 0
     if grade >= THRESHOLD_RECALL
       @repetition++ if @repetition < (RANGE_REPETITION - 1)
+      @_I now
     else
-      if @repetition >= 0
-        @lapse++ if @lapse < (RANGE_AF - 1)
-        @previousDate = null  # set interval() to @sm.intervalBase
-      @repetition = 0
-    @_I now
+      @lapse++ if @lapse < (RANGE_AF - 1)
+      @optimumInterval = @sm.intervalBase
+      @previousDate = null  # set interval() to @sm.intervalBase
+      @dueDate = new Date 0
+      @repetition = -1
 
   data: =>
     value: @value
@@ -218,7 +219,7 @@ class ForgettingCurves
                 if r > 0
                   ([MIN_AF + NOTCH_AF * i, Math.min REMEMBERED, Math.exp((-(r+1) / 200) * (i - a * Math.sqrt(2 / (r+1)))) * (REMEMBERED - @sm.requestedFI)] for i in [0..20])
                 else
-                  ([MIN_AF + NOTCH_AF * i, Math.min REMEMBERED, Math.exp((-1 / 10) * (i - Math.sqrt(a / 2))) * (REMEMBERED - @sm.requestedFI)] for i in [0..20])
+                  ([MIN_AF + NOTCH_AF * i, Math.min REMEMBERED, Math.exp((-1 / (10 + 1*(a+1))) * (i - Math.pow(a, 0.6))) * (REMEMBERED - @sm.requestedFI)] for i in [0..20])
               [[0, REMEMBERED]].concat p
           new ForgettingCurve partialPoints
 

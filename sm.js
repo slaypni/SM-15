@@ -280,16 +280,16 @@
         if (this.repetition < (RANGE_REPETITION - 1)) {
           this.repetition++;
         }
+        return this._I(now);
       } else {
-        if (this.repetition >= 0) {
-          if (this.lapse < (RANGE_AF - 1)) {
-            this.lapse++;
-          }
-          this.previousDate = null;
+        if (this.lapse < (RANGE_AF - 1)) {
+          this.lapse++;
         }
-        this.repetition = 0;
+        this.optimumInterval = this.sm.intervalBase;
+        this.previousDate = null;
+        this.dueDate = new Date(0);
+        return this.repetition = -1;
       }
-      return this._I(now);
     };
 
     Item.prototype.data = function() {
@@ -438,7 +438,7 @@
                 var _k, _results2;
                 _results2 = [];
                 for (i = _k = 0; _k <= 20; i = ++_k) {
-                  _results2.push([MIN_AF + NOTCH_AF * i, Math.min(REMEMBERED, Math.exp((-1 / 10) * (i - Math.sqrt(a / 2))) * (REMEMBERED - this.sm.requestedFI))]);
+                  _results2.push([MIN_AF + NOTCH_AF * i, Math.min(REMEMBERED, Math.exp((-1 / (10 + 1 * (a + 1))) * (i - Math.pow(a, 0.6))) * (REMEMBERED - this.sm.requestedFI))]);
                 }
                 return _results2;
               }).call(this), [[0, REMEMBERED]].concat(p));
