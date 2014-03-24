@@ -218,7 +218,7 @@ class ForgettingCurves
                 if r > 0
                   ([MIN_AF + NOTCH_AF * i, Math.min REMEMBERED, Math.exp((-(r+1) / 200) * (i - a * Math.sqrt(2 / (r+1)))) * (REMEMBERED - @sm.requestedFI)] for i in [0..20])
                 else
-                  ([MIN_AF + NOTCH_AF * i, Math.min REMEMBERED, Math.exp((-1 / 40) * (i - Math.sqrt(a))) * (REMEMBERED - @sm.requestedFI)] for i in [0..20])
+                  ([MIN_AF + NOTCH_AF * i, Math.min REMEMBERED, Math.exp((-1 / 10) * (i - Math.sqrt(a / 2))) * (REMEMBERED - @sm.requestedFI)] for i in [0..20])
               [[0, REMEMBERED]].concat p
           new ForgettingCurve partialPoints
 

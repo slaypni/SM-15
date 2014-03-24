@@ -438,7 +438,7 @@
                 var _k, _results2;
                 _results2 = [];
                 for (i = _k = 0; _k <= 20; i = ++_k) {
-                  _results2.push([MIN_AF + NOTCH_AF * i, Math.min(REMEMBERED, Math.exp((-1 / 40) * (i - Math.sqrt(a))) * (REMEMBERED - this.sm.requestedFI))]);
+                  _results2.push([MIN_AF + NOTCH_AF * i, Math.min(REMEMBERED, Math.exp((-1 / 10) * (i - Math.sqrt(a / 2))) * (REMEMBERED - this.sm.requestedFI))]);
                 }
                 return _results2;
               }).call(this), [[0, REMEMBERED]].concat(p));
