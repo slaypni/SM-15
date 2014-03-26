@@ -287,7 +287,7 @@
         }
         this.optimumInterval = this.sm.intervalBase;
         this.previousDate = null;
-        this.dueDate = new Date(0);
+        this.dueDate = now;
         return this.repetition = -1;
       }
     };

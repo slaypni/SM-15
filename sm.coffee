@@ -141,7 +141,7 @@ class Item
       @lapse++ if @lapse < (RANGE_AF - 1)
       @optimumInterval = @sm.intervalBase
       @previousDate = null  # set interval() to @sm.intervalBase
-      @dueDate = new Date 0
+      @dueDate = now
       @repetition = -1
 
   data: =>
